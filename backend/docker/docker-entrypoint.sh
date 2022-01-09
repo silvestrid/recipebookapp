@@ -41,7 +41,7 @@ done
 
 
 show_help() {
-# If you change this please update ./docs/reference/baserow-docker-api.md
+# If you change this please update ./docs/reference/recipebook-docker-api.md
     echo """
 Usage: docker run <imagename> COMMAND
 Commands
@@ -60,13 +60,13 @@ help      : Show this message
 
 run_setup_commands_if_configured(){
 if [ "$MIGRATE_ON_STARTUP" = "true" ] ; then
-  echo "python /baserow/backend/src/baserow/manage.py migrate"
-  python /baserow/backend/src/baserow/manage.py migrate
+  echo "python /recipebook/backend/src/recipebook/manage.py migrate"
+  python /recipebook/backend/src/recipebook/manage.py migrate
 fi
-if [ "$SYNC_TEMPLATES_ON_STARTUP" = "true" ] ; then
-  echo "python /baserow/backend/src/baserow/manage.py sync_templates"
-  python /baserow/backend/src/baserow/manage.py sync_templates
-fi
+# if [ "$SYNC_TEMPLATES_ON_STARTUP" = "true" ] ; then
+#   echo "python /recipebook/backend/src/recipebook/manage.py sync_templates"
+#   python /recipebook/backend/src/recipebook/manage.py sync_templates
+# fi
 }
 
 case "$1" in
@@ -75,7 +75,7 @@ case "$1" in
         run_setup_commands_if_configured
         echo "Running Development Server on 0.0.0.0:${PORT}"
         echo "Press CTRL-p CTRL-q to close this session without stopping the container."
-        CMD="python /baserow/backend/src/baserow/manage.py runserver 0.0.0.0:${PORT}"
+        CMD="python /recipebook/backend/src/recipebook/manage.py runserver 0.0.0.0:${PORT}"
         echo "$CMD"
         # The below command lets devs attach to this container, press ctrl-c and only
         # the server will stop. Additionally they will be able to use bash history to
@@ -85,41 +85,23 @@ case "$1" in
     local)
         wait_for_postgres
         run_setup_commands_if_configured
-        exec gunicorn --workers=3 -b 0.0.0.0:"${PORT}" -k uvicorn.workers.UvicornWorker baserow.config.asgi:application
+        exec gunicorn --workers=3 -b 0.0.0.0:"${PORT}" -k uvicorn.workers.UvicornWorker recipebook.config.asgi:application
     ;;
     bash)
         exec /bin/bash "${@:2}"
     ;;
     manage)
-        exec python /baserow/backend/src/baserow/manage.py "${@:2}"
+        exec python /recipebook/backend/src/recipebook/manage.py "${@:2}"
     ;;
     python)
         exec python "${@:2}"
     ;;
     shell)
-        exec python /baserow/backend/src/baserow/manage.py shell
+        exec python /recipebook/backend/src/recipebook/manage.py shell
     ;;
     lint)
         CMD="make lint-python"
         echo "$CMD"
-        exec bash --init-file <(echo "history -s $CMD; $CMD")
-    ;;
-    celery)
-        exec celery -A baserow "${@:2}"
-    ;;
-    celery-dev)
-        # Ensure we watch all possible python source code locations for changes.
-        directory_args=''
-        for i in $(echo "$PYTHONPATH" | tr ":" "\n")
-        do
-          directory_args="$directory_args -d=$i"
-        done
-
-        CMD="watchmedo auto-restart $directory_args --pattern=*.py --recursive -- celery -A baserow ${*:2}"
-        echo "$CMD"
-        # The below command lets devs attach to this container, press ctrl-c and only
-        # the server will stop. Additionally they will be able to use bash history to
-        # re-run the containers run server command after they have done what they want.
         exec bash --init-file <(echo "history -s $CMD; $CMD")
     ;;
     *)
