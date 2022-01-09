@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def index(request):
-    ret = {}
+    recipes = []
     for user in BaserowUser.objects.all():
         recipebook_db_name = user.recipebook_db_name
         # check if a recipe book db exists
@@ -36,11 +36,14 @@ def index(request):
             continue
         jwt = rsp['token']
 
+        # "Recipe Book" is the name of the application
+        # every application has a unique name and contains all the tables
         applications = requests.get(
             f'{API_URL}/applications/',
             headers={'Authorization': f'JWT {jwt}'}
         ).json()
 
+        # look for the table fields id
         dishes_fields_id = None
         for app in applications:
             if app['name'] == recipebook_db_name:
@@ -54,25 +57,28 @@ def index(request):
             logger.error("Failed to find dishes table for user %s", user.mail)
             continue
 
+        # get table data and
         table_info = requests.get(
             f'{API_URL}/database/views/table/{dishes_fields_id}/?include=filter,sortings',
             headers={'Authorization': f'JWT {jwt}'}
         ).json()
 
-        # first table is the "All Dishes" table
+        # first object of the list is the "All Dishes" grid
         dishes_table_id = table_info[0]['id']
-        table_fields = requests.get(
-            f'{API_URL}/database/fields/table/{dishes_table_id}/',
-            headers={'Authorization': f'JWT {jwt}'}
-        ).json()
-
         table_data = requests.get(
-            f'{API_URL}/database/views/grid/{dishes_table_id}/?limit=80&offset=0&include=field_options,row_metadata',
+            f'{API_URL}/database/views/grid/{dishes_table_id}/?limit=80&offset=0&',
             headers={'Authorization': f'JWT {jwt}'}
         ).json()
 
-        ret[user.mail] = {
-            'fields': table_fields,
-            'data': table_data,
-        }
-    return JsonResponse(ret)
+        table_fields = requests.get(
+            f'{API_URL}/database/fields/table/{dishes_fields_id}/',
+            headers={'Authorization': f'JWT {jwt}'}
+        ).json()
+
+        for row in table_data['results']:
+            recipe = {'user': user.mail}
+            for field in table_fields:
+                name = field['name'].lower().replace(' ', '_')
+                recipe[name] = row[f'field_{field["id"]}']
+            recipes.append(recipe)
+    return JsonResponse({'recipes': recipes})
