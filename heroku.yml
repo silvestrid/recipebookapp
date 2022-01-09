@@ -4,6 +4,6 @@ build:
 release:
   image: web
   command:
-    - /recipebook/env/bin/python /recipebook/recipebook/backend/src/recipebook/manage.py migrate --settings=heroku.settings && /recipebook/env/bin/python /recipebook/recipebook/backend/src/recipebook/manage.py sync_templates --settings=heroku.settings
+    - /recipebook/env/bin/python /recipebook/recipebook/backend/src/recipebook/manage.py migrate --settings=heroku.settings
 run:
   web: . /recipebook/entry.sh && /usr/bin/supervisord --configuration /etc/supervisor/conf.d/supervisor.conf

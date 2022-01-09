@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && \
     apt install -y \
-    curl sudo gnupg2
+    curl sudo gnupg2 nano
 
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - \
     && curl -sL https://deb.nodesource.com/setup_12.x  | bash -
@@ -15,12 +15,13 @@ RUN apt-get update && \
     libpq-dev \
     python3 build-essential libxslt-dev python3-dev python3-virtualenv \
     python3-setuptools zlib1g-dev libffi-dev libssl-dev python3-pip \
-    nodejs \
     && rm -rf /var/cache/apt /var/lib/apt/lists
 
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+RUN apt install -y nodejs
 RUN npm install --global yarn mjml
 
-RUN mkdir -p /recipebook
+RUN mkdir -p /recipebook /run/temp/update-check
 WORKDIR /recipebook
 
 RUN service supervisor stop && service nginx stop

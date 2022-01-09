@@ -6,7 +6,7 @@ import RecipeList from './components/RecipeList';
 
 import './App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 const fetcher = (url, ...args) => fetch(`${BACKEND_URL}${url}`, ...args).then(res => res.json());
 
 function App() {

@@ -1,18 +1,16 @@
 {
   "name": "recipebook",
   "description": "",
-  "repository": "https://gitlab.com/bramw/recipebook",
+  "repository": "https://github.com/silvestrid/recipebook",
   "keywords": [
     "recipebook",
     "no-code",
-    "database",
-    "airtable"
+    "database"
   ],
   "logo": "https://baserow.io/img/favicon_192.png",
   "success_url": "/",
   "addons": [
     "heroku-postgresql:hobby-dev",
-    "heroku-redis:hobby-dev",
     "mailgun:starter"
   ],
   "formation": {
@@ -27,12 +25,12 @@
       "description": "A unique string that is used to generate secrets.",
       "generator": "secret"
     },
-    "recipebook_PUBLIC_URL": {
+    "RECIPEBOOK_PUBLIC_URL": {
       "description": "The public URL of your Heroku recipebook app. Don't forget to replace YOUR_APP_NAME with the name of your app.",
-      "value": "https://YOUR_APP_NAME.herokuapp.com",
+      "value": "https://baserowrecipegrid.herokuapp.com",
       "required": true
     },
-    "recipebook_AMOUNT_OF_WORKERS": {
+    "RECIPEBOOK_AMOUNT_OF_WORKERS": {
       "description": "The amount of workers per dyno. This value must be `1` if you want to run the free plan.",
       "value": "1",
       "required": true
