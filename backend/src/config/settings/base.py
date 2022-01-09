@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-import datetime
 import os
 
 from corsheaders.defaults import default_headers
@@ -25,7 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-n=ra1l_7dn()cnnu^^b7t-v&h2q6xkgtz(xot!nwmfv4nddf6k'
+SECRET_KEY = os.getenv(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-n=ra1l_7dn()cnnu^^b7t-v&h2q6xkgtz(xot!nwmfv4nddf6k'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
