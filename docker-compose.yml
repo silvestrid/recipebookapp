@@ -1,0 +1,97 @@
+version: "3"
+
+services:
+  db:
+    # Please ensure the postgres-client's major version in the backend image is kept in
+    # sync with this major version so pg_dump remains compatible.
+    image: postgres:11.3
+    environment:
+      - POSTGRES_USER=${DATABASE_USER:-recipebookapp}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-recipebookapp}
+      - POSTGRES_DB=${DATABASE_NAME:-recipebookapp}
+    networks:
+      local: null
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      dockerfile: ./backend/Dockerfile
+      context: .
+    image: recipebookapp_backend:latest
+    environment:
+      - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL:-http://localhost:8000}
+      - PUBLIC_WEB_FRONTEND_URL=${PUBLIC_WEB_FRONTEND_URL:-http://localhost:3000}
+      - MIGRATE_ON_STARTUP=${MIGRATE_ON_STARTUP:-true}
+      - SYNC_TEMPLATES_ON_STARTUP=${SYNC_TEMPLATES_ON_STARTUP:-true}
+      - DATABASE_USER=${DATABASE_USER:-recipebookapp}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-recipebookapp}
+      - DATABASE_NAME=${DATABASE_NAME:-recipebookapp}
+      - ADDITIONAL_APPS
+      - MEDIA_URL=${MEDIA_URL:-http://localhost:4000/media/}
+      - EMAIL_SMTP
+      - EMAIL_SMTP_HOST
+      - EMAIL_SMTP_PORT
+      - EMAIL_SMTP_USE_TLS
+      - EMAIL_SMTP_USER
+      - EMAIL_SMTP_PASSWORD
+      - FROM_EMAIL
+    ports:
+      - "${HOST_PUBLISH_IP:-127.0.0.1}:${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      - db
+      - media-volume-fixer
+    volumes:
+      - media:/recipebookapp/media
+    networks:
+      local: null
+
+  web-frontend:
+    build:
+      context: .
+      dockerfile: ./web-frontend/Dockerfile
+    image: recipebookapp_web-frontend:latest
+    environment:
+      - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL:-http://localhost:8000}
+      - PUBLIC_WEB_FRONTEND_URL=${PUBLIC_WEB_FRONTEND_URL:-http://localhost:3000}
+      - ADDITIONAL_MODULES
+    ports:
+      - "${HOST_PUBLISH_IP:-127.0.0.1}:${WEB_FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      - backend
+    networks:
+      local:
+
+        null # A nginx container purely to serve up django's MEDIA files.
+  media:
+    build: media
+    ports:
+      - "${HOST_PUBLISH_IP:-127.0.0.1}:${MEDIA_PORT:-4000}:80"
+    depends_on:
+      - media-volume-fixer
+    volumes:
+      - media:/recipebookapp/media
+    networks:
+      local:
+
+        null
+        # When switching between dev and local the media files in the media volume will be
+        # owned by different users. Ensure that we chown them to the user appropriate for the
+        # environment here.
+  media-volume-fixer:
+    image: bash:4.4
+    command: chown 9999:9999 -R /recipebookapp/media
+    volumes:
+      - media:/recipebookapp/media
+    networks:
+      local:
+
+        null
+volumes:
+  pgdata: null
+  media:
+
+    null
+networks:
+  local:
+    driver: bridge

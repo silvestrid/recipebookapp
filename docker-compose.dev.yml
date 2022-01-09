@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+
+  db:
+    ports:
+      - "${HOST_PUBLISH_IP:-127.0.0.1}:${POSTGRES_PORT:-5432}:5432"
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/docker/Dockerfile.dev
+      args:
+        # We allow configuring the UID/GID here so you can run as the dev's actual user
+        # reducing the chance the containers screw up the bind mounted folders.
+        UID: "${UID:-}"
+        GID: "${GID:-}"
+    image: recipebookapp_backend_dev:latest
+    volumes:
+      - ./backend:/recipebookapp/backend
+    # Open stdin and tty so when attaching key input works as expected.
+    stdin_open: true
+    tty: true
+
+  web-frontend:
+    build:
+      context: .
+      dockerfile: ./web-frontend/docker/Dockerfile.dev
+      args:
+        # We allow configuring the UID/GID here so you can run as the dev's actual user
+        # reducing the chance the containers screw up the bind mounted folders.
+        UID: "${UID:-}"
+        GID: "${GID:-}"
+    image: recipebookapp_web-frontend_dev:latest
+    volumes:
+      - ./web-frontend:/recipebookapp/web-frontend
+      # Override the above mounts for node_modules so we use the node_modules built
+      # directly into the image instead of whatever is on your local filesystem.
+      - /recipebookapp/web-frontend/node_modules
+
+    # Open stdin and tty so when attaching key input works as expected.
+    stdin_open: true
+    tty: true
+
+  media-volume-fixer:
+    command: chown ${UID:-1000}:${GID:-1000} -R /recipebookapp/media
