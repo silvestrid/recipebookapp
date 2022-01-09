@@ -220,17 +220,17 @@ else
   echo "./dev.sh Using the already set value for the env variable MIGRATE_ON_STARTUP = $MIGRATE_ON_STARTUP"
 fi
 
-if [[ -z "${SYNC_TEMPLATES_ON_STARTUP:-}" ]]; then
-if [ "$sync_templates" = true ] ; then
-export SYNC_TEMPLATES_ON_STARTUP="true"
-else
-# Because of the defaults set in the docker-compose file we need to explicitly turn
-# this off as just not setting it will get the default "true" value.
-export SYNC_TEMPLATES_ON_STARTUP="false"
-fi
-else
-  echo "./dev.sh Using the already set value for the env variable SYNC_TEMPLATES_ON_STARTUP = $SYNC_TEMPLATES_ON_STARTUP"
-fi
+# if [[ -z "${SYNC_TEMPLATES_ON_STARTUP:-}" ]]; then
+# if [ "$sync_templates" = true ] ; then
+# export SYNC_TEMPLATES_ON_STARTUP="true"
+# else
+# # Because of the defaults set in the docker-compose file we need to explicitly turn
+# # this off as just not setting it will get the default "true" value.
+# export SYNC_TEMPLATES_ON_STARTUP="false"
+# fi
+# else
+#   echo "./dev.sh Using the already set value for the env variable SYNC_TEMPLATES_ON_STARTUP = $SYNC_TEMPLATES_ON_STARTUP"
+# fi
 
 echo "./dev.sh running docker-compose commands:
 ------------------------------------------------
@@ -265,9 +265,9 @@ if [ "$dont_attach" != true ] && [ "$up" = true ] ; then
 
   launch_tab_and_attach "backend" "backend"
   launch_tab_and_attach "web frontend" "web-frontend"
-  launch_tab_and_attach "celery" "celery"
-  launch_tab_and_attach "export worker" "celery-export-worker"
-  launch_tab_and_attach "beat worker" "celery-beat-worker"
+  # launch_tab_and_attach "celery" "celery"
+  # launch_tab_and_attach "export worker" "celery-export-worker"
+  # launch_tab_and_attach "beat worker" "celery-beat-worker"
 
   launch_tab_and_exec "web frontend lint" \
           "web-frontend" \

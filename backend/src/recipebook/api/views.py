@@ -1,4 +1,5 @@
 import logging
+import random
 import requests
 
 from django.core.exceptions import BadRequest
@@ -76,9 +77,11 @@ def index(request):
         ).json()
 
         for row in table_data['results']:
-            recipe = {'user': user.mail}
+            recipe = {'owner': user.name}
             for field in table_fields:
                 name = field['name'].lower().replace(' ', '_')
                 recipe[name] = row[f'field_{field["id"]}']
             recipes.append(recipe)
+    # mix the recipes randomly
+    random.shuffle(recipes)
     return JsonResponse({'recipes': recipes})
