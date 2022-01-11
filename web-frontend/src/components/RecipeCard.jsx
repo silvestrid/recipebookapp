@@ -52,7 +52,7 @@ export default function RecipeCard(props) {
                 <p className="mb-4 text-gray-500 truncate overflow-hidden">{props.recipe.suggestions}</p>
                 <div className="flex justify-between">
                     <button className="text-white bg-indigo-400 hover:bg-indigo-600 p-4 rounded-md uppercase">View Recipe</button>
-                    <p className="text-indigo-400 bg-white border-solid border-2 border-indigo-400 p-4 rounded-md">{props.recipe.owner}</p>
+                    <p className="text-indigo-400 bg-white border-solid border-2 border-indigo-400 p-4 rounded-md">{props.recipe.username}</p>
                 </div>
             </div>
             {getDifficultyLabel(props.recipe?.difficulty?.value)}

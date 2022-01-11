@@ -3,10 +3,9 @@ from django.db import models
 
 class BaserowUser(models.Model):
     name = models.CharField(max_length=100)
-    mail = models.CharField(max_length=255, unique=True)
-    password = models.CharField(max_length=255)
+    baserow_mail = models.CharField(max_length=255, unique=True)
     api_key = models.CharField(max_length=255, unique=True)
-    recipebook_db_name = models.CharField(max_length=255)
+    dishes_table_id = models.IntegerField()
 
     def __str__(self) -> str:
-        return self.mail
+        return self.name
